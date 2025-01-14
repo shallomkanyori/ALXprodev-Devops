@@ -5,44 +5,11 @@ POKEMON_NAME="pikachu"
 DATA_FILE="data.json"
 ERROR_FILE="errors.txt"
 
-# Install jq if not already installed
-if ! [ -x "$(command -v jq)" ]; then
-    echo "This script requires jq. Installing jq..."
-    sudo apt-get install jq
-
-    if [ $? -ne 0 ]; then
-        echo "Error: Could not install jq" >> $ERROR_FILE
-        exit 1
-    fi
-fi
-
-# Get the data, parse it and save it to a file
-response=$(curl -s $URL)
+response=$(curl -s $URL$POKEMON_NAME)
 if [ $? -ne 0 ]; then
-    echo "Error: Could not get data from $URL" >> $ERROR_FILE
+    echo "Error: Could not get data from $URL$POKEMON_NAME" >> $ERROR_FILE
     exit 1
 fi
 
-next_url=$(echo $response | jq -r '.next')
-while [ "$next_url" != "null" ]; do
-    pokemon_url=$(echo $response | jq -r ".results[] | select(.name == \"$POKEMON_NAME\") | .url")
-    if [ "$pokemon_url" != "" ]; then
-        pokemon_data=$(curl -s $pokemon_url)
-        if [ $? -ne 0 ]; then
-            echo "Error: Could not get data from $pokemon_url" >> $ERROR_FILE
-            exit 1
-        fi
-        echo $pokemon_data | jq '.' >> $DATA_FILE
-        echo "Data saved to $DATA_FILE"
-        exit 0
-    fi
-
-    response=$(curl -s $next_url)
-    if [ $? -ne 0 ]; then
-        echo "Error: Could not get data from $next_url" >> $ERROR_FILE
-        exit 1
-    fi
-    next_url=$(echo $response | jq -r '.next')
-done
-
-echo "Error: Pokemon $POKEMON_NAME not found" >> $ERROR_FILE
+echo $response | jq '.' > $DATA_FILE
+echo "Data saved to $DATA_FILE"
