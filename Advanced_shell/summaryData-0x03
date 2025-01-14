@@ -1,0 +1,39 @@
+#!/bin/bash
+# Summarizes batch processed data from the Pokemon API
+
+URL="https://pokeapi.co/api/v2/pokemon/"
+DATA_FILE="data.csv"
+ERROR_FILE="errors.txt"
+POKEMON_LIST=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+
+function summarize_data() {
+    local pokemon_name=$1
+    local data_file="$pokemon_name.json"
+    local height=$(jq '.height' $data_file)
+    local weight=$(jq '.weight' $data_file)
+    
+    if [ -z "$height" ] || [ -z "$weight" ]; then
+        echo "Error: Missing data for $pokemon_name" >> $ERROR_FILE
+        return 1
+    fi
+    
+    echo "$pokemon_name,$height,$weight" >> $DATA_FILE
+    echo "Data summarized for $pokemon_name"
+    return 0
+}
+
+for pokemon in "${POKEMON_LIST[@]}"; do
+    summarize_data $pokemon
+    if [ $? -ne 0 ]; then
+        echo "Error summarizing data for $pokemon"
+    fi
+done
+
+echo "Data summarization complete"
+
+# Get average height and weight
+avg_height=$(awk -F',' '{sum+=$2} END {print sum/NR}' $DATA_FILE)
+avg_weight=$(awk -F',' '{sum+=$3} END {print sum/NR}' $DATA_FILE)
+
+echo "Average height: $avg_height"
+echo "Average weight: $avg_weight"
