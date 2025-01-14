@@ -13,7 +13,7 @@ pokemon_height=$(jq -r '.height' $DATA_FILE)
 pokemon_weight=$(jq -r '.weight' $DATA_FILE)
 type=$(capitalize $(jq -r '.types[0].type.name' $DATA_FILE))
 
-formatted_height=$(printf "%.1f" "$(($pokemon_height))e-1")
+formatted_height=$(awk "BEGIN {printf \"%.1f\", $pokemon_height / 10}")
 formatted_weight=$((pokemon_weight / 10))
 
 echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
