@@ -4,13 +4,16 @@
 DATA_FILE="data.json"
 
 function capitalize() {
-    echo $1 | awk '{print toupper(substr($0, 1, 1)) tolower(substr($0, 2))}'
+    echo $1 | sed 's/./\U&/'
 }
 
 # Parse the data
-pokemon_name=$(jq -r '.name' $DATA_FILE)
+name=$(capitalize $(jq -r '.name' $DATA_FILE))
 pokemon_height=$(jq -r '.height' $DATA_FILE)
 pokemon_weight=$(jq -r '.weight' $DATA_FILE)
-pokemon_type=$(jq -r '.types[0].type.name' $DATA_FILE)
+type=$(capitalize $(jq -r '.types[0].type.name' $DATA_FILE))
 
-printf "%s is of type %s, weighs %dkg, and is %.1fm tall.\n" "$(capitalize $pokemon_name)" "$(capitalize $pokemon_type)" $((pokemon_weight/10)) $((10 * pokemon_height / 10))e-1
+formatted_height=$(printf "%.1f" "$(($pokemon_height))e-1")
+formatted_weight=$((pokemon_weight / 10))
+
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
