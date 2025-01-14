@@ -1,0 +1,29 @@
+#!/bin/bash
+# Loops through a list of Pokemon and fetches their data from the API
+    
+URL="https://pokeapi.co/api/v2/pokemon/"
+ERROR_FILE="errors.txt"
+POKEMON_LIST=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+    
+function fetch_data() {
+    local pokemon_name=$1
+    local data_file="$pokemon_name.json"
+
+    response=$(curl -s $URL$pokemon_name)
+    if [ $? -ne 0 ]; then
+        echo "Error: Could not get data from $URL$pokemon_name" >> $ERROR_FILE
+        return 1
+    fi
+
+    echo $response | jq '.' > $data_file
+    echo "Data saved to $data_file"
+    return 0
+}
+
+for pokemon in "${POKEMON_LIST[@]}"; do
+    fetch_data $pokemon
+    if [ $? -ne 0 ]; then
+        echo "Error fetching data for $pokemon"
+    fi
+    sleep 10
+done
