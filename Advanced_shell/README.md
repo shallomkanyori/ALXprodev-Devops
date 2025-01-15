@@ -11,3 +11,6 @@ Automate the retrieval of data for multiple Pokémon and store it in separate fi
 
 ## Task 3
 Create a report that summarizes data for multiple Pokémon.
+
+## Task 4
+Add robust error handling and retry logic for API requests.
