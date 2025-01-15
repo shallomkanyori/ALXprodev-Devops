@@ -34,9 +34,17 @@ function fetch_data() {
     return 0
 }
 
+job_pids=()
+
+trap 'echo "Terminating..."; kill ${job_pids[*]} 2>/dev/null; exit 1' SIGINT SIGTERM
+
 for pokemon in ${POKEMON_LIST[@]}; do
     fetch_data $pokemon &
+    job_pids+=($!)
 done
+
+echo "Background jobs:"
+jobs
 
 wait
 echo "All data fetched"
